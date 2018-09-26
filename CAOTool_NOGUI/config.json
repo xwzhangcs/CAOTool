@@ -1,0 +1,42 @@
+{
+  "do_voxel_model" : false,
+  "input_slice_filename" : "C:/gen/LEGO/run_test/AOI-D4-Jacksonville/BuildingClusters/004/Slices/slice_000000.png",
+  "output_mesh" : "C:/gen/GitHub/LEGO/LEGO_NOGUI/output.obj",
+  "output_top_face" : "C:/gen/GitHub/LEGO/LEGO_NOGUI/topface.txt",
+  "offset_x" : 1.0,
+  "offset_y" : 1.0,
+  "offset_z" : 1.0,
+  "scale" : 0.3,
+  "bulk_orientation" : 44.9170036315918,
+  "contour_simplification_weight" : 0.5,
+  "contour_snapping_threshold" : 3.0,
+  "layering_threshold" : 0.7,
+  "minimum_contour_area" : 2.0,
+  "maximum_obb_ratio" : 10.0,
+  "min_hole_ratio" : 0.02,
+  "allow_triangle_contour" : false,
+  "allow_overhang" : false,
+  "minimum_layer_height" : 2.5,
+  "contour_simplification_algorithms" : {
+    "douglas_peucker" : {
+      "use" : false,
+      "epsilon" : 16
+    },
+    "right_angle" : {
+      "use" : true,
+      "epsilon" : 20,
+	  "optimization" : true
+    },
+    "curve" : {
+      "use" : false,
+      "epsilon" : 16,
+      "curve_threshold" : 2
+    },
+    "curvepp" : {
+      "use" : true,
+      "epsilon" : 18,
+      "curve_threshold" : 2.5,
+      "angle_threshold" : 12
+    }
+  }
+}

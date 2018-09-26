@@ -1,0 +1,301 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindowClass</class>
+ <widget class="QMainWindow" name="MainWindowClass">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>752</width>
+    <height>735</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>CAOTool</string>
+  </property>
+  <widget class="QWidget" name="centralWidget"/>
+  <widget class="QMenuBar" name="menuBar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>752</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuFile">
+    <property name="title">
+     <string>File</string>
+    </property>
+    <addaction name="actionOpen"/>
+    <addaction name="actionSaveOBJ"/>
+    <addaction name="actionSaveTopFaces"/>
+    <addaction name="actionSavePLY"/>
+    <addaction name="separator"/>
+    <addaction name="actionLoadOBJ"/>
+    <addaction name="separator"/>
+    <addaction name="actionSaveImage"/>
+    <addaction name="separator"/>
+    <addaction name="actionExit"/>
+   </widget>
+   <widget class="QMenu" name="menuRendering">
+    <property name="title">
+     <string>Rendering</string>
+    </property>
+    <addaction name="actionColor"/>
+    <addaction name="actionTexture"/>
+    <addaction name="separator"/>
+    <addaction name="actionRenderingBasic"/>
+    <addaction name="actionRenderingSSAO"/>
+    <addaction name="actionRenderingHatching"/>
+   </widget>
+   <widget class="QMenu" name="menuSimplify">
+    <property name="title">
+     <string>Simplify</string>
+    </property>
+    <addaction name="actionInputVoxel"/>
+    <addaction name="separator"/>
+    <addaction name="actionSimplifyByAll"/>
+    <addaction name="actionSimplifyByDP"/>
+    <addaction name="actionSimplifyByRightAngle"/>
+    <addaction name="actionSimplifyByCurve"/>
+    <addaction name="actionSimplifyByCurveRightAngle"/>
+    <addaction name="actionSimplifyByEfficientRANSAC"/>
+    <addaction name="separator"/>
+    <addaction name="actionDPTest"/>
+    <addaction name="actionRightAngleTest"/>
+    <addaction name="actionCurveTest"/>
+    <addaction name="separator"/>
+    <addaction name="actionOffsetScale"/>
+   </widget>
+   <widget class="QMenu" name="menuTool">
+    <property name="title">
+     <string>Tool</string>
+    </property>
+    <addaction name="actionFindMatachingLayers"/>
+   </widget>
+   <addaction name="menuFile"/>
+   <addaction name="menuSimplify"/>
+   <addaction name="menuRendering"/>
+   <addaction name="menuTool"/>
+  </widget>
+  <widget class="QToolBar" name="mainToolBar">
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+  </widget>
+  <widget class="QStatusBar" name="statusBar"/>
+  <action name="actionExit">
+   <property name="text">
+    <string>Exit</string>
+   </property>
+  </action>
+  <action name="actionOpenSliceImage">
+   <property name="icon">
+    <iconset>
+     <normaloff>Resources/open.png</normaloff>Resources/open.png</iconset>
+   </property>
+   <property name="text">
+    <string>Open Slice Image</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+O</string>
+   </property>
+  </action>
+  <action name="actionRenderingBasic">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Basic</string>
+   </property>
+  </action>
+  <action name="actionRenderingSSAO">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>SSAO</string>
+   </property>
+  </action>
+  <action name="actionRenderingHatching">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Hatching</string>
+   </property>
+  </action>
+  <action name="actionOpen">
+   <property name="icon">
+    <iconset>
+     <normaloff>Resources/open.png</normaloff>Resources/open.png</iconset>
+   </property>
+   <property name="text">
+    <string>Open</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+O</string>
+   </property>
+  </action>
+  <action name="actionSavePLY">
+   <property name="text">
+    <string>Save PLY</string>
+   </property>
+  </action>
+  <action name="actionSimplifyByDP">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Douglas-Peucker</string>
+   </property>
+  </action>
+  <action name="actionSimplifyByRightAngle">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Right Angle</string>
+   </property>
+  </action>
+  <action name="actionInputVoxel">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Input</string>
+   </property>
+  </action>
+  <action name="actionSaveImage">
+   <property name="text">
+    <string>Save Image</string>
+   </property>
+   <property name="shortcut">
+    <string>P</string>
+   </property>
+  </action>
+  <action name="actionSaveImageHD">
+   <property name="text">
+    <string>Save Image HD</string>
+   </property>
+  </action>
+  <action name="actionColor">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Color</string>
+   </property>
+  </action>
+  <action name="actionTexture">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Texture</string>
+   </property>
+  </action>
+  <action name="actionColoringByLayer">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Coloring by Layer</string>
+   </property>
+  </action>
+  <action name="actionSimplifyByCurve">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Curve</string>
+   </property>
+  </action>
+  <action name="actionSimplifyByAll">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>All</string>
+   </property>
+  </action>
+  <action name="actionDPTest">
+   <property name="text">
+    <string>Douglas-Peucker Test</string>
+   </property>
+  </action>
+  <action name="actionRightAngleTest">
+   <property name="text">
+    <string>Right Angle Test</string>
+   </property>
+  </action>
+  <action name="actionCurveTest">
+   <property name="text">
+    <string>Curve Test</string>
+   </property>
+  </action>
+  <action name="actionSimplifyByCurveRightAngle">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Curve + Right Angle</string>
+   </property>
+  </action>
+  <action name="actionSaveOBJ">
+   <property name="icon">
+    <iconset>
+     <normaloff>Resources/save.png</normaloff>Resources/save.png</iconset>
+   </property>
+   <property name="text">
+    <string>Save OBJ</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+S</string>
+   </property>
+  </action>
+  <action name="actionSaveTopFaces">
+   <property name="text">
+    <string>Save Top Faces</string>
+   </property>
+  </action>
+  <action name="actionOffsetScale">
+   <property name="text">
+    <string>Offset &amp; Scale</string>
+   </property>
+  </action>
+  <action name="actionSimplifyByEfficientRANSAC">
+   <property name="text">
+    <string>EfficientRANSAC</string>
+   </property>
+  </action>
+  <action name="actionLoadOBJ">
+   <property name="text">
+    <string>Load OBJ</string>
+   </property>
+  </action>
+  <action name="actionFindMatachingLayers">
+   <property name="text">
+    <string>Find Mataching Layers</string>
+   </property>
+  </action>
+ </widget>
+ <layoutdefault spacing="6" margin="11"/>
+ <resources>
+  <include location="MainWindow.qrc"/>
+ </resources>
+ <connections/>
+</ui>

@@ -1,0 +1,192 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="CrispAccurateOpt.cpp" />
+    <ClCompile Include="efficient_ransac\ContourGenerator.cpp" />
+    <ClCompile Include="efficient_ransac\CurveDetector.cpp" />
+    <ClCompile Include="efficient_ransac\EfficientRANSAC.cpp" />
+    <ClCompile Include="efficient_ransac\EfficientRANSACUtil.cpp" />
+    <ClCompile Include="efficient_ransac\LineDetector.cpp" />
+    <ClCompile Include="efficient_ransac\PrimitiveShape.cpp" />
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="regularizer\Config.cpp" />
+    <ClCompile Include="regularizer\ShapeFitLayer.cpp" />
+    <ClCompile Include="regularizer\ShapeFitLayersAll.cpp" />
+    <ClCompile Include="regularizer\SymmetryLineDetector.cpp" />
+    <ClCompile Include="simp\BuildingSimplification.cpp" />
+    <ClCompile Include="simp\CurveRightAngleSimplification.cpp" />
+    <ClCompile Include="simp\CurveSimplification.cpp" />
+    <ClCompile Include="simp\DPSimplification.cpp" />
+    <ClCompile Include="simp\EfficientRansacSimplification.cpp" />
+    <ClCompile Include="simp\RightAngleSimplification.cpp" />
+    <ClCompile Include="util\BuildingLayer.cpp" />
+    <ClCompile Include="util\ContourUtils.cpp" />
+    <ClCompile Include="util\DisjointVoxelData.cpp" />
+    <ClCompile Include="util\EfficientRansacCurveDetector.cpp" />
+    <ClCompile Include="util\OBJWriter.cpp" />
+    <ClCompile Include="util\PlyWriter.cpp" />
+    <ClCompile Include="util\PointSetShapeDetection.cpp" />
+    <ClCompile Include="util\TopFaceWriter.cpp" />
+    <ClCompile Include="util\VoxelBuilding.cpp" />
+    <ClCompile Include="voxel_model.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="CrispAccurateOpt.h" />
+    <ClInclude Include="efficient_ransac\ContourGenerator.h" />
+    <ClInclude Include="efficient_ransac\CurveDetector.h" />
+    <ClInclude Include="efficient_ransac\EfficientRANSAC.h" />
+    <ClInclude Include="efficient_ransac\EfficientRANSACUtil.h" />
+    <ClInclude Include="efficient_ransac\LineDetector.h" />
+    <ClInclude Include="efficient_ransac\PrimitiveShape.h" />
+    <ClInclude Include="regularizer\Config.h" />
+    <ClInclude Include="regularizer\ShapeFitLayer.h" />
+    <ClInclude Include="regularizer\ShapeFitLayersAll.h" />
+    <ClInclude Include="regularizer\SymmetryLineDetector.h" />
+    <ClInclude Include="simp\BuildingSimplification.h" />
+    <ClInclude Include="simp\CurveRightAngleSimplification.h" />
+    <ClInclude Include="simp\CurveSimplification.h" />
+    <ClInclude Include="simp\DPSimplification.h" />
+    <ClInclude Include="simp\EfficientRansacSimplification.h" />
+    <ClInclude Include="simp\RightAngleSimplification.h" />
+    <ClInclude Include="util\BuildingLayer.h" />
+    <ClInclude Include="util\ContourUtils.h" />
+    <ClInclude Include="util\DisjointVoxelData.h" />
+    <ClInclude Include="util\EfficientRansacCurveDetector.h" />
+    <ClInclude Include="util\OBJWriter.h" />
+    <ClInclude Include="util\PlyWriter.h" />
+    <ClInclude Include="util\PointSetShapeDetection.h" />
+    <ClInclude Include="util\TopFaceWriter.h" />
+    <ClInclude Include="util\VerticalPlane.h" />
+    <ClInclude Include="util\VoxelBuilding.h" />
+    <ClInclude Include="voxel_model.h" />
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{A84953E3-4DFB-4479-9C1B-022F9487F2EA}</ProjectGuid>
+    <RootNamespace>LEGO_NOGUI</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup />
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <SDLCheck>true</SDLCheck>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>..\opencv3.4\include;$(QTDIR)\include;$(QTDIR)\include\QtCore;C:\CGAL-4.11.1\include;C:\CGAL-4.11.1\auxiliary\gmp\include;$(BOOST_INCLUDEDIR);$(DLIB);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalOptions>-D_SCL_SECURE_NO_WARNINGS /bigobj %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>..\opencv3.4\lib;$(QTDIR)\lib;C:\CGAL-4.11.1\lib;C:\CGAL-4.11.1\auxiliary\gmp\lib;$(BOOST_LIBRARYDIR);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>opencv_core340d.lib;opencv_highgui340d.lib;opencv_imgcodecs340d.lib;opencv_imgproc340d.lib;qtmaind.lib;Qt5Cored.lib;CGAL_Core-vc120-mt-gd-4.11.1.lib;CGAL_ImageIO-vc120-mt-gd-4.11.1.lib;CGAL-vc120-mt-gd-4.11.1.lib;libgmp-10.lib;libmpfr-4.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <SubSystem>Console</SubSystem>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>..\opencv3.4\include;$(QTDIR)\include;$(QTDIR)\include\QtCore;C:\CGAL-4.11.1\include;C:\CGAL-4.11.1\auxiliary\gmp\include;$(BOOST_INCLUDEDIR);$(DLIB);..\glm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalOptions>/D_SCL_SECURE_NO_WARNINGS  /bigobj %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalLibraryDirectories>..\opencv3.4\lib;$(QTDIR)\lib;C:\CGAL-4.11.1\lib;C:\CGAL-4.11.1\auxiliary\gmp\lib;$(BOOST_LIBRARYDIR);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>opencv_core340.lib;opencv_highgui340.lib;opencv_imgcodecs340.lib;opencv_imgproc340.lib;qtmain.lib;Qt5Core.lib;CGAL_Core-vc120-mt-4.11.1.lib;CGAL_ImageIO-vc120-mt-4.11.1.lib;CGAL-vc120-mt-4.11.1.lib;libgmp-10.lib;libmpfr-4.lib;libboost_thread-vc120-mt-1_58.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <SubSystem>Console</SubSystem>
+    </Link>
+  </ItemDefinitionGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
