@@ -249,9 +249,9 @@ int main(int argc, const char* argv[]) {
 		}
 		
 		// read output obj output_mesh
-		QString output_mesh;
+		QString output_mesh_path;
 		try {
-			output_mesh = readStringValue(doc, "output_mesh");
+			output_mesh_path = readStringValue(doc, "output_mesh_path");
 		}
 		catch (...) {
 			std::cerr << "Invalid data for output_mesh in the json file." << std::endl;
@@ -300,6 +300,7 @@ int main(int argc, const char* argv[]) {
 		// do voxel model (for debug)
 		if (do_voxel_model) {
 		  std::cout<< "Doing voxel model" << std::endl;
+		  QString output_mesh = output_mesh_path + "building.obj";
 		  voxel_model::voxel_model(voxel_data, output_mesh.toStdString(), offset_x, offset_y, offset_z, scale);
 		  return 0;
 		}
@@ -358,17 +359,43 @@ int main(int argc, const char* argv[]) {
 		write_obj_info.push_back(offset_z);
 		write_obj_info.push_back(scale);
 
-		// call optimization function
-		std::vector<std::shared_ptr<util::BuildingLayer>> buildings;
-		buildings = CrispAccurateOpt::fit(voxel_buildings, input_jido_mesh.toUtf8().constData(), write_obj_info, algorithms, false, min_layer_height, contour_simplification_weight, layering_threshold, contour_snapping_threshold, orientation, min_contour_area, max_obb_ratio, allow_triangle_contour, allow_overhang, min_hole_ratio, regularizer_configs);
-		/*std::cout << "voxel_data[0].cols is " << voxel_data[0].cols << std::endl;
-		std::cout << "voxel_data[0].rows is " << voxel_data[0].rows << std::endl;
-		std::cout << "offset_x is " << offset_x << std::endl;
-		std::cout << "offset_y is " << offset_y << std::endl;
-		std::cout << "offset_z is " << offset_z << std::endl;
-		std::cout << "scale is " << scale << std::endl;*/
-		util::obj::OBJWriter::write(output_mesh.toUtf8().constData(), voxel_data[0].cols, voxel_data[0].rows, offset_x, offset_y, offset_z, scale, buildings);
-		std::cout << buildings.size() << " Optimized buildings are generated." << std::endl;
+
+		// consider running multiple times which means choose several init points
+		int total_runs = 10;
+		std::pair <double, double> radian_data(0, 0.45);
+		std::pair <double, double> degree_data(0, 25);
+		std::pair <double, double> dis_percent_data(0, 0.10);
+		std::pair <double, double> dis_pixel_data(0, 30);
+		std::pair <double, double> cluster_epsilon_data(0, 0.08);
+		std::pair <double, double> max_errors_data(0, 8);
+		float per_slice = 1.0 / (total_runs + 2);
+		for (int i = 1; i <= total_runs; i++){
+			// call optimization function
+			QString output_mesh = output_mesh_path + "building_" + QString::number(i) + ".obj";
+			std::cout << "output mesh file name " << output_mesh.toUtf8().constData() << std::endl;
+			// algorithm
+			algorithms.at(simp::BuildingSimplification::ALG_EFFICIENT_RANSAC)[8] = i * per_slice * (dis_percent_data.second - dis_percent_data.first) + dis_percent_data.first;
+			algorithms.at(simp::BuildingSimplification::ALG_EFFICIENT_RANSAC)[9] = i * per_slice * (max_errors_data.second - max_errors_data.first) + max_errors_data.first;
+			algorithms.at(simp::BuildingSimplification::ALG_EFFICIENT_RANSAC)[10] = i * per_slice * (cluster_epsilon_data.second - cluster_epsilon_data.first) + cluster_epsilon_data.first;
+			algorithms.at(simp::BuildingSimplification::ALG_EFFICIENT_RANSAC)[11] = i * per_slice * (dis_percent_data.second - dis_percent_data.first) + dis_percent_data.first;
+			algorithms.at(simp::BuildingSimplification::ALG_EFFICIENT_RANSAC)[12] = i * per_slice * (radian_data.second - radian_data.first) + radian_data.first;
+
+			algorithms.at(simp::BuildingSimplification::ALG_EFFICIENT_RANSAC)[13] = i * per_slice * (dis_pixel_data.second - dis_pixel_data.first) + dis_pixel_data.first;
+			algorithms.at(simp::BuildingSimplification::ALG_EFFICIENT_RANSAC)[14] = i * per_slice * (radian_data.second - radian_data.first) + radian_data.first;
+
+			// regularizer
+			regularizer_configs[0].angle_threshold_RA = i * per_slice  * (degree_data.second - degree_data.first) + degree_data.first;
+			regularizer_configs[0].angle_threshold_parallel = i * per_slice * (degree_data.second - degree_data.first) + degree_data.first;
+			regularizer_configs[0].pointDisThreshold = i * per_slice * (dis_pixel_data.second - dis_pixel_data.first) + dis_pixel_data.first;
+			regularizer_configs[0].segDisThreshold = i * per_slice * (dis_pixel_data.second - dis_pixel_data.first + dis_pixel_data.first);
+			regularizer_configs[0].segAngleThreshold = i * per_slice * (degree_data.second - degree_data.first) + degree_data.first;
+
+			std::vector<std::shared_ptr<util::BuildingLayer>> buildings;
+			buildings = CrispAccurateOpt::fit(voxel_buildings, input_jido_mesh.toUtf8().constData(), write_obj_info, algorithms, false, min_layer_height, contour_simplification_weight, layering_threshold, contour_snapping_threshold, orientation, min_contour_area, max_obb_ratio, allow_triangle_contour, allow_overhang, min_hole_ratio, regularizer_configs);
+			//buildings = simp::BuildingSimplification::simplifyBuildings(voxel_buildings, algorithms, false, min_layer_height, contour_simplification_weight, layering_threshold, contour_snapping_threshold, orientation, min_contour_area, max_obb_ratio, allow_triangle_contour, allow_overhang, min_hole_ratio, regularizer_configs);
+			util::obj::OBJWriter::write(output_mesh.toUtf8().constData(), voxel_data[0].cols, voxel_data[0].rows, offset_x, offset_y, offset_z, scale, buildings);
+			std::cout << buildings.size() << " Optimized buildings are generated." << std::endl;
+		}
 	}
 	return 0;
 }

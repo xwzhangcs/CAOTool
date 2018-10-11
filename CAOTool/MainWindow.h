@@ -21,6 +21,8 @@ public:
 	int indexOfNumberLetter(std::string& str, int offset);
 	int lastIndexOfNumberLetter(std::string& str);
 	std::vector<std::string> split(const std::string &s, char delim);
+	std::vector<std::string> loadOBJ(std::string filename, std::string save_path);
+	std::vector<int> FindMatachingLayers(std::vector<std::string> jido_layer_images, std::vector<std::string> cgv_layer_images);
 
 public slots:
 	void onOpen();
@@ -41,6 +43,7 @@ public slots:
 	void onColoringModeChanged();
 	void onRenderingModeChanged();
 	void onFindMatachingLayers();
+	void onCompareModels();
 };
 
 #endif // MAINWINDOW_H

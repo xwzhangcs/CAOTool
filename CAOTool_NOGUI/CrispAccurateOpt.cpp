@@ -59,55 +59,70 @@ std::vector<std::shared_ptr<util::BuildingLayer>> CrispAccurateOpt::fit(std::vec
 	}*/
 	total_points += 5;
 	try {
+
+		// data range
+		std::pair <double, double> radian_data(0, 0.45);
+		std::pair <double, double> degree_data(0, 25);
+		std::pair <double, double> dis_percent_data(0, 0.10);
+		std::pair <double, double> dis_pixel_data(0, 30);
+		std::pair <double, double> cluster_epsilon_data(0, 0.08);
+		std::pair <double, double> max_errors_data(0, 8);
+
 		column_vector starting_point(total_points);
 
 		// parameters from line detection
-		starting_point(0) = line_min_points;
-		starting_point(1) = line_max_error;
-		starting_point(2) = line_cluster_epsilon;
-		starting_point(3) = line_min_length;
-		starting_point(4) = line_angle_threshold;
+		starting_point(0) = (line_min_points - dis_percent_data.first) / (dis_percent_data.second - dis_percent_data.first);
+		starting_point(1) = (line_max_error - max_errors_data.first) / (max_errors_data.second - max_errors_data.first);
+		starting_point(2) = (line_cluster_epsilon - cluster_epsilon_data.first) / (cluster_epsilon_data.second - cluster_epsilon_data.first);
+		starting_point(3) = (line_min_length - dis_percent_data.first) / (dis_percent_data.second - dis_percent_data.first);
+		starting_point(4) = (line_angle_threshold - radian_data.first) / (radian_data.second - radian_data.first);
 
 		// parameters from contour generation
-		starting_point(5) = contour_max_error;
-		starting_point(6) = contour_angle_threshold;
+		starting_point(5) = (contour_max_error - dis_pixel_data.first) / (dis_pixel_data.second - dis_pixel_data.first);
+		starting_point(6) = (contour_angle_threshold - radian_data.first) / (radian_data.second - radian_data.first);
 
 		// parameters from regularization
-		starting_point(7) = ra_angle;
-		starting_point(8) = parallel_angle;
-		starting_point(9) = pointSnap_dis;
-		starting_point(10) = segSnap_dis;
-		starting_point(11) = segSnap_angle;
-
+		starting_point(7) = (ra_angle - degree_data.first) / (degree_data.second - degree_data.first);
+		starting_point(8) = (parallel_angle - degree_data.first) / (degree_data.second - degree_data.first);
+		starting_point(9) = (pointSnap_dis - dis_pixel_data.first) / (dis_pixel_data.second - dis_pixel_data.first);
+		starting_point(10) = (segSnap_dis - dis_pixel_data.first) / (dis_pixel_data.second - dis_pixel_data.first);
+		starting_point(11) = (segSnap_angle - degree_data.first) / (degree_data.second - degree_data.first);
 		BFGSSolver solver(voxel_buildings, jido_mesh, write_obj_info, algorithms, record_stats, min_num_slices_per_layer, alpha, layering_threshold, snapping_threshold, orientation, min_contour_area, max_obb_ratio, allow_triangle_contour, allow_overhang, min_hole_ratio, regularizer_configs);
-		find_max_using_approximate_derivatives(dlib::bfgs_search_strategy(), dlib::objective_delta_stop_strategy(1e-6), solver, starting_point, 1, 0.0001);
+		find_max_using_approximate_derivatives(dlib::bfgs_search_strategy(), dlib::objective_delta_stop_strategy(1e-4), solver, starting_point, 1, 0.02);
 		std::vector<std::shared_ptr<util::BuildingLayer>> buildings;
 		std::map<int, std::vector<double>> ans_algorithms;
 		ans_algorithms[simp::BuildingSimplification::ALG_EFFICIENT_RANSAC] = algorithms.at(simp::BuildingSimplification::ALG_EFFICIENT_RANSAC);
-		ans_algorithms[simp::BuildingSimplification::ALG_EFFICIENT_RANSAC][8] = starting_point(0);
-		ans_algorithms[simp::BuildingSimplification::ALG_EFFICIENT_RANSAC][9] = starting_point(1);
-		ans_algorithms[simp::BuildingSimplification::ALG_EFFICIENT_RANSAC][10] = starting_point(2);
-		ans_algorithms[simp::BuildingSimplification::ALG_EFFICIENT_RANSAC][11] = starting_point(3);
-		ans_algorithms[simp::BuildingSimplification::ALG_EFFICIENT_RANSAC][12] = starting_point(4);
-		ans_algorithms[simp::BuildingSimplification::ALG_EFFICIENT_RANSAC][13] = starting_point(5);
-		ans_algorithms[simp::BuildingSimplification::ALG_EFFICIENT_RANSAC][14] = starting_point(6);
+		ans_algorithms[simp::BuildingSimplification::ALG_EFFICIENT_RANSAC][8] = starting_point(0) * (dis_percent_data.second - dis_percent_data.first) + dis_percent_data.first;;
+		ans_algorithms[simp::BuildingSimplification::ALG_EFFICIENT_RANSAC][9] = starting_point(1) * (max_errors_data.second - max_errors_data.first) + max_errors_data.first;
+		ans_algorithms[simp::BuildingSimplification::ALG_EFFICIENT_RANSAC][10] = starting_point(2) * (cluster_epsilon_data.second - cluster_epsilon_data.first) + cluster_epsilon_data.first;
+		ans_algorithms[simp::BuildingSimplification::ALG_EFFICIENT_RANSAC][11] = starting_point(3) * (dis_percent_data.second - dis_percent_data.first) + dis_percent_data.first;
+		ans_algorithms[simp::BuildingSimplification::ALG_EFFICIENT_RANSAC][12] = starting_point(4) * (radian_data.second - radian_data.first) + radian_data.first;
+		ans_algorithms[simp::BuildingSimplification::ALG_EFFICIENT_RANSAC][13] = starting_point(5) * (dis_pixel_data.second - dis_pixel_data.first) + dis_pixel_data.first;
+		ans_algorithms[simp::BuildingSimplification::ALG_EFFICIENT_RANSAC][14] = starting_point(6) * (radian_data.second - radian_data.first) + radian_data.first;
 
 		std::vector<regularizer::Config> ans_regularizer_configs;
 		ans_regularizer_configs.resize(regularizer_configs.size());
 		for (int i = 0; i < regularizer_configs.size(); i++)
 			ans_regularizer_configs[i] = regularizer_configs[i];
-		ans_regularizer_configs[0].angle_threshold_RA = starting_point(7);
-		ans_regularizer_configs[0].angle_threshold_parallel = starting_point(8);
-		ans_regularizer_configs[0].pointDisThreshold = starting_point(9);
-		ans_regularizer_configs[0].segDisThreshold = starting_point(10);
-		ans_regularizer_configs[0].segAngleThreshold = starting_point(11);
-		/*{
-			std::cout << "ans_regularizer_configs[0].angle_threshold_RA " << ans_regularizer_configs[0].angle_threshold_RA << std::endl;
-			std::cout << "ans_regularizer_configs[0].angle_threshold_parallel " << ans_regularizer_configs[0].angle_threshold_parallel << std::endl;
-			std::cout << "ans_regularizer_configs[0].pointDisThreshold " << ans_regularizer_configs[0].pointDisThreshold << std::endl;
-			std::cout << "ans_regularizer_configs[0].segDisThreshold " << ans_regularizer_configs[0].segDisThreshold << std::endl;
-			std::cout << "ans_regularizer_configs[0].segAngleThreshold " << ans_regularizer_configs[0].segAngleThreshold << std::endl;
-		}*/
+		ans_regularizer_configs[0].angle_threshold_RA = starting_point(7) * (degree_data.second - degree_data.first) + degree_data.first;
+		ans_regularizer_configs[0].angle_threshold_parallel = starting_point(8) * (degree_data.second - degree_data.first) + degree_data.first;
+		ans_regularizer_configs[0].pointDisThreshold = starting_point(9) *(dis_pixel_data.second - dis_pixel_data.first) + dis_pixel_data.first;
+		ans_regularizer_configs[0].segDisThreshold = starting_point(10) *(dis_pixel_data.second - dis_pixel_data.first + dis_pixel_data.first);
+		ans_regularizer_configs[0].segAngleThreshold = starting_point(11) *(degree_data.second - degree_data.first) + degree_data.first;
+		{
+			std::cout << "ans line_min_points is " << ans_algorithms[simp::BuildingSimplification::ALG_EFFICIENT_RANSAC][8] << std::endl;
+			std::cout << "ans line_max_error is " << ans_algorithms[simp::BuildingSimplification::ALG_EFFICIENT_RANSAC][9] << std::endl;
+			std::cout << "ans line_cluster_epsilon is " << ans_algorithms[simp::BuildingSimplification::ALG_EFFICIENT_RANSAC][10] << std::endl;
+			std::cout << "ans line_min_length is " << ans_algorithms[simp::BuildingSimplification::ALG_EFFICIENT_RANSAC][11] << std::endl;
+			std::cout << "ans line_angle_threshold is " << ans_algorithms[simp::BuildingSimplification::ALG_EFFICIENT_RANSAC][12] << std::endl;
+			std::cout << "ans contour_max_error is " << ans_algorithms[simp::BuildingSimplification::ALG_EFFICIENT_RANSAC][13] << std::endl;
+			std::cout << "ans contour_angle_threshold is " << ans_algorithms[simp::BuildingSimplification::ALG_EFFICIENT_RANSAC][14] << std::endl;
+			std::cout << "ans angle_threshold_RA " << ans_regularizer_configs[0].angle_threshold_RA << std::endl;
+			std::cout << "ans angle_threshold_parallel " << ans_regularizer_configs[0].angle_threshold_parallel << std::endl;
+			std::cout << "ans pointDisThreshold " << ans_regularizer_configs[0].pointDisThreshold << std::endl;
+			std::cout << "ans segDisThreshold " << ans_regularizer_configs[0].segDisThreshold << std::endl;
+			std::cout << "ans segAngleThreshold " << ans_regularizer_configs[0].segAngleThreshold << std::endl;
+		}
 		buildings = simp::BuildingSimplification::simplifyBuildings(voxel_buildings, ans_algorithms, false, min_num_slices_per_layer, alpha, layering_threshold, snapping_threshold, orientation, min_contour_area, max_obb_ratio, allow_triangle_contour, allow_overhang, min_hole_ratio, ans_regularizer_configs);
 
 		return buildings;
@@ -236,7 +251,7 @@ std::vector<std::string> CrispAccurateOpt::loadOBJ(std::string filename, std::st
 		}
 		// output layer height
 		for (int i = 0; i < layer_heights.size(); i++){
-			std::cout << "layer " << i << " height is " << layer_heights[i] << std::endl;
+			//std::cout << "layer " << i << " height is " << layer_heights[i] << std::endl;
 		}
 		// earse the ground layer
 		layer_heights.erase(layer_heights.begin());

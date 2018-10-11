@@ -52,8 +52,9 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
 	connect(ui.actionTexture, SIGNAL(triggered()), this, SLOT(onColoringModeChanged()));
 	connect(ui.actionRenderingBasic, SIGNAL(triggered()), this, SLOT(onRenderingModeChanged()));
 	connect(ui.actionRenderingSSAO, SIGNAL(triggered()), this, SLOT(onRenderingModeChanged())); 
-	connect(ui.actionRenderingHatching, SIGNAL(triggered()), this, SLOT(onRenderingModeChanged()));
+	connect(ui.actionRenderingHatching, SIGNAL(triggered()), this, SLOT(onRenderingModeChanged())); 
 	connect(ui.actionFindMatachingLayers, SIGNAL(triggered()), this, SLOT(onFindMatachingLayers()));
+	connect(ui.actionCompareModels, SIGNAL(triggered()), this, SLOT(onCompareModels()));
 
 	// create tool bar for file menu
 	ui.mainToolBar->addAction(ui.actionOpen);
@@ -152,6 +153,73 @@ void MainWindow::onFindMatachingLayers(){
 	}
 }
 
+void MainWindow::onCompareModels(){
+	// load jido obj model
+	QString filename_jido = QFileDialog::getOpenFileName(this, tr("Load OBJ file..."), "", tr("OBJ files (*.obj)"));
+	std::vector<std::string> jido_layer_images;
+	std::vector<std::string> cgv_layer_images;
+	float score = 0.0f;
+	if (!filename_jido.isEmpty()) {
+		jido_layer_images = loadOBJ(filename_jido.toUtf8().constData(), "../compare/tmp/jido_");
+	}
+
+	// load cgv obj model
+	QString filename_cgv = QFileDialog::getOpenFileName(this, tr("Load OBJ file..."), "", tr("OBJ files (*.obj)"));
+	if (!filename_cgv.isEmpty()) {
+		cgv_layer_images = loadOBJ(filename_cgv.toUtf8().constData(), "../compare/tmp/cgv_");
+	}
+	// find the matching layers
+	if (!filename_jido.isEmpty() && !filename_cgv.isEmpty()){
+		std::vector<int> match_indices = FindMatachingLayers(jido_layer_images, cgv_layer_images);
+		// compute similarity socre
+		int layers_number = cgv_layer_images.size();
+		int total_polygons = 0;
+		for (int i = 0; i < layers_number; i++){
+			std::vector<cv::Point2f> jido_contour;
+			int cols_jido = 0;
+			int rows_jido = 0;
+			std::cout << "matching layer index is " << match_indices[i] << std::endl;
+			{
+				cv::Mat src = cv::imread(jido_layer_images[match_indices[i]], 0);
+				cols_jido = src.cols;
+				rows_jido = src.rows;
+				std::vector<std::vector<cv::Point> > contours;
+				std::vector<cv::Vec4i> hierarchy;
+				/// Find contours
+				findContours(src, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE, cv::Point(0, 0));
+				float epsilon = 1.0f;
+				// simplify contour
+				cv::approxPolyDP(contours[0], jido_contour, epsilon, true);
+				std::cout << "after simplification jido layer " << match_indices[i] << " size " << jido_contour.size() << std::endl;
+			}
+
+			std::vector<cv::Point2f> cgv_contour;
+			{
+				cv::Mat src = cv::imread(cgv_layer_images[i], 0);
+				cv::Mat src_tmp;
+				cv::resize(src, src_tmp, cv::Size(cols_jido, rows_jido), 0, 0, cv::INTER_NEAREST);
+				src = src_tmp;
+				std::vector<std::vector<cv::Point> > contours;
+				std::vector<cv::Vec4i> hierarchy;
+				/// Find contours
+				findContours(src, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE, cv::Point(0, 0));
+				float epsilon = 1.0f;
+				// simplify contour
+				cv::approxPolyDP(contours[0], cgv_contour, epsilon, true);
+				std::cout << "after simplification cgv layer " << i << " size " << cgv_contour.size() << std::endl;
+				cv::imwrite("../compare/tmp/cgv_after_" + std::to_string(i) + ".png", src);
+			}
+			// compute score
+			float layer_score = util::calculateIOUbyCGAL(cgv_contour, jido_contour);
+			score += layer_score;
+			std::cout << "---layer " << i << " score is " << layer_score << std::endl;
+			total_polygons++;
+		}
+		score = score / total_polygons;
+		std::cout << "similarity score is " << score << std::endl;
+	}
+}
+
 void MainWindow::onSaveOBJ() {
 	QString filename = QFileDialog::getSaveFileName(this, tr("Save OBJ file..."), "", tr("OBJ files (*.obj)"));
 	if (!filename.isEmpty()) {
@@ -183,6 +251,201 @@ std::vector<std::string> MainWindow::split(const std::string &s, char delim) {
 	}
 
 	return elems;
+}
+
+std::vector<std::string> MainWindow::loadOBJ(std::string filename, std::string save_path) {
+	if (!filename.empty()) {
+		std::ifstream file(filename);
+		if (!file.is_open()) {
+			std::vector<std::string> empty;
+			return empty;
+		}
+
+		// Store vertex
+		std::vector<glm::vec3> raw_vertices;
+		std::vector<std::pair<float, glm::vec2>> layer_vertices;
+		std::vector<glm::vec3> face_vertex_indices;
+		std::vector<float> layer_heights;
+
+		std::string line;
+		while (getline(file, line)) {
+			if (line.substr(0, 2) == "v ") {
+				// Read position data
+				int index1 = indexOfNumberLetter(line, 2);
+				int index2 = lastIndexOfNumberLetter(line);
+				std::vector<std::string> values = split(line.substr(index1, index2 - index1 + 1), ' ');
+				glm::vec3 vert(stof(values[0]), stof(values[1]), stof(values[2]));
+				glm::vec2 vert2d(stof(values[0]), stof(values[1]));
+				float z_value = stof(values[2]);
+				//std::cout << "x is " << vert.x << ", y is " << vert.y << ", z is " << vert.z << std::endl;
+				raw_vertices.push_back(vert);
+				layer_vertices.push_back(std::make_pair(z_value, vert2d));
+			}
+			else if (line.substr(0, 3) == "vn ") {
+				// Read normal data
+
+			}
+			else if (line.substr(0, 2) == "f ") {
+				// Read face data
+				// Read face data
+				int index1 = indexOfNumberLetter(line, 2);
+				int index2 = lastIndexOfNumberLetter(line);
+				std::vector<std::string> values = split(line.substr(index1, index2 - index1 + 1), ' ');
+				for (int i = 0; i < values.size() - 2; i++) {
+					// Split up vertex indices
+					std::vector<std::string> v1 = split(values[0], '/');		// Triangle fan for ngons
+					std::vector<std::string> v2 = split(values[i + 1], '/');
+					std::vector<std::string> v3 = split(values[i + 2], '/');
+
+					// Store position indices
+					glm::vec3 vert(stoi(v1[0]) - 1, stoi(v2[0]) - 1, stoi(v3[0]) - 1);
+					face_vertex_indices.push_back(vert);
+					//std::cout << "1st index is " << vert.x << ", 2nd is " << vert.y << ", 3rd is " << vert.z << std::endl;
+				}
+			}
+		}
+		file.close();
+
+		//std::cout << "layer_vertices size is " << layer_vertices.size() << std::endl;
+		sort(layer_vertices.begin(), layer_vertices.end(), [](const std::pair<float, glm::vec2>& lhs, std::pair<float, glm::vec2>& rhs){return lhs.first < rhs.first; });
+		for (int i = 0; i < layer_vertices.size(); i++)
+		{
+			if (layer_heights.size() == 0)
+				layer_heights.push_back(layer_vertices[i].first);
+			else{
+				if (layer_vertices[i].first - layer_heights[layer_heights.size() - 1] >= 0.6)
+					layer_heights.push_back(layer_vertices[i].first);
+			}
+		}
+		// output layer height
+		for (int i = 0; i < layer_heights.size(); i++){
+			std::cout << "layer " << i << " height is " << layer_heights[i] << std::endl;
+		}
+		// earse the ground layer
+		layer_heights.erase(layer_heights.begin());
+		//
+		std::vector<std::vector<glm::vec3>> layer_faces;
+		layer_faces.resize(layer_heights.size());
+		for (int i = 0; i < face_vertex_indices.size(); i++){
+			int first = face_vertex_indices[i].x;
+			int second = face_vertex_indices[i].y;
+			int third = face_vertex_indices[i].z;
+			//if (raw_vertices[first].z == raw_vertices[second].z && raw_vertices[first].z == raw_vertices[third].z){
+			if (abs(raw_vertices[first].z - raw_vertices[second].z) < 0.6 && abs(raw_vertices[first].z - raw_vertices[third].z) < 0.6){
+				for (int j = 0; j < layer_heights.size(); j++){
+					//if (raw_vertices[first].z - layer_heights[j] < 0.6)
+					if (raw_vertices[first].z >= layer_heights[j])
+						layer_faces[j].push_back(face_vertex_indices[i]);
+				}
+			}
+		}
+		// get min_x min_y max_x max_y
+		float min_x = std::numeric_limits<float>::max();
+		float min_y = std::numeric_limits<float>::max();
+		float max_x = -std::numeric_limits<float>::max();
+		float max_y = -std::numeric_limits<float>::max();
+
+		for (int i = 0; i < raw_vertices.size(); i++) {
+			min_x = std::min(min_x, raw_vertices[i].x);
+			min_y = std::min(min_y, raw_vertices[i].y);
+			max_x = std::max(max_x, raw_vertices[i].x);
+			max_y = std::max(max_y, raw_vertices[i].y);
+		}
+		min_x = min_x - 5;
+		min_y = min_y - 5;
+		max_x = max_x + 5;
+		max_y = max_y + 5;
+		int rows = max_y - min_y;
+		int cols = max_x - min_x;
+		int lineType = 8;
+		std::vector<std::string> layer_image_files;
+		for (int i = 0; i < layer_faces.size(); i++){
+			cv::Mat img = cv::Mat::zeros(rows, cols, CV_8UC3);
+			//std::cout << "layer faces " << i << ", size is " << layer_faces[i].size() << std::endl;
+			for (int j = 0; j < layer_faces[i].size(); j++){
+				cv::Point rook_points[1][3] = { 0 };
+				const cv::Point* ppt[1];
+				rook_points[0][0] = cv::Point(raw_vertices[layer_faces[i][j].x].x - min_x, raw_vertices[layer_faces[i][j].x].y - min_y);
+				rook_points[0][1] = cv::Point(raw_vertices[layer_faces[i][j].y].x - min_x, raw_vertices[layer_faces[i][j].y].y - min_y);
+				rook_points[0][2] = cv::Point(raw_vertices[layer_faces[i][j].z].x - min_x, raw_vertices[layer_faces[i][j].z].y - min_y);
+				int npt[1] = { 3 };
+				ppt[0] = rook_points[0];
+				cv::fillPoly(img,
+					ppt,
+					npt,
+					1,
+					cv::Scalar(255, 255, 255),
+					lineType);
+			}
+
+			std::string img_filename = save_path + std::to_string(i) + ".png";
+			cv::imwrite(img_filename, img);
+			layer_image_files.push_back(img_filename);
+		}
+		return layer_image_files;
+	}
+}
+
+std::vector<int> MainWindow::FindMatachingLayers(std::vector<std::string> files_jido, std::vector<std::string> files_cgv){
+	// get layer images for jido model
+	std::vector<cv::Mat_<uchar>> layer_imgs_jido(files_jido.size());
+	for (int i = 0; i < files_jido.size(); i++) {
+		layer_imgs_jido[i] = cv::imread(files_jido[i], cv::IMREAD_GRAYSCALE);
+	}
+	// get layer images for cgv model
+	std::vector<cv::Mat_<uchar>> layer_imgs_cgv(files_cgv.size());
+	for (int i = 0; i < files_cgv.size(); i++) {
+		layer_imgs_cgv[i] = cv::imread(files_cgv[i], cv::IMREAD_GRAYSCALE);
+	}
+
+	// get new image size 
+	int rows_jido = layer_imgs_jido[0].rows;
+	int cols_jido = layer_imgs_jido[0].cols;
+	// resize cgv images
+	for (int i = 0; i < layer_imgs_cgv.size(); i++){
+		cv::Mat img_tmp;
+		cv::resize(layer_imgs_cgv[i], img_tmp, cv::Size(cols_jido, rows_jido), 0, 0, cv::INTER_NEAREST);
+		layer_imgs_cgv[i] = img_tmp;
+		//QString img_filename = "../data/cgv_" + QString::number(i) + ".png";
+		//cv::imwrite(img_filename.toUtf8().constData(), layer_imgs_cgv[i]);
+	}
+
+	// find intersection between jido and cgv models
+	std::vector<int> match_layer_indices;
+	for (int i = 0; i < layer_imgs_cgv.size(); i++){
+		cv::Mat_<uchar> img2 = layer_imgs_cgv[i];
+		float best_score = -std::numeric_limits<float>::max();
+		int best_index = -1;
+		for (int j = 0; j < layer_imgs_jido.size(); j++){
+			// computer IOU
+			float score = 0.0f;
+			int inter_cnt = 0;
+			int union_cnt = 0;
+			cv::Mat_<uchar> img1 = layer_imgs_jido[j];
+			for (int r = 0; r < img1.rows; r++) {
+				for (int c = 0; c < img1.cols; c++) {
+					if (img1(r, c) == 255 && img2(r, c) == 255) inter_cnt++;
+					if (img1(r, c) == 255 || img2(r, c) == 255) union_cnt++;
+				}
+			}
+			if (union_cnt == 0){
+				score = 0.0f;
+			}
+			else
+				score = (double)inter_cnt / union_cnt;
+			if (score > best_score){
+				best_score = score;
+				best_index = j;
+			}
+
+		}
+		//std::cout << "best_score is " << best_score << std::endl;
+		//std::cout << "best_index is " << best_index << std::endl;
+		match_layer_indices.push_back(best_index);
+		// find the maximum
+
+	}
+	return match_layer_indices;
 }
 
 void MainWindow::onLoadOBJ() {

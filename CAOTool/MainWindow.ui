@@ -73,6 +73,7 @@
      <string>Tool</string>
     </property>
     <addaction name="actionFindMatachingLayers"/>
+    <addaction name="actionCompareModels"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuSimplify"/>
@@ -290,6 +291,11 @@
   <action name="actionFindMatachingLayers">
    <property name="text">
     <string>Find Mataching Layers</string>
+   </property>
+  </action>
+  <action name="actionCompareModels">
+   <property name="text">
+    <string>Compare Models</string>
    </property>
   </action>
  </widget>
